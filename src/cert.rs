@@ -27,8 +27,8 @@ pub enum NameOid {
 
 #[derive(Debug, PartialEq)]
 pub struct Name {
-    oid: NameOid,
-    name: String,
+    pub oid: NameOid,
+    pub name: String,
 }
 
 #[derive(Debug, PartialEq)]
@@ -72,14 +72,14 @@ pub enum SignAlgoId {
 
 #[derive(Debug, PartialEq)]
 pub struct RsaPub {
-    n: Vec<u8>,
-    e: u32,
+    pub n: Vec<u8>,
+    pub e: u32,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct EcPub {
-    key: Vec<u8>,
-    curve: Vec<u64>,
+    pub key: Vec<u8>,
+    pub curve: Vec<u64>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -112,24 +112,24 @@ pub enum ExtOid {
 
 #[derive(Debug, PartialEq)]
 pub struct Extension {
-    oid: ExtOid,
-    critical: bool,
-    data: Vec<u8>,
+    pub oid: ExtOid,
+    pub critical: bool,
+    pub data: Vec<u8>,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct C509 {
-    cert_type: Option<CertType>,
-    serial_number: Vec<u8>,
-    issuer: Vec<Name>,
-    not_before: u64,
-    not_after: u64,
-    subject: Vec<Name>,
-    pub_key_algo: Option<PubAlgoId>,
-    pub_key: Option<PubKey>,
-    extensions: Vec<Extension>,
-    sign_algo: Option<SignAlgoId>,
-    sign: Vec<u8>,
+    pub cert_type: Option<CertType>,
+    pub serial_number: Vec<u8>,
+    pub issuer: Vec<Name>,
+    pub not_before: u64,
+    pub not_after: u64,
+    pub subject: Vec<Name>,
+    pub pub_key_algo: Option<PubAlgoId>,
+    pub pub_key: Option<PubKey>,
+    pub extensions: Vec<Extension>,
+    pub sign_algo: Option<SignAlgoId>,
+    pub sign: Vec<u8>,
 }
 
 impl C509 {

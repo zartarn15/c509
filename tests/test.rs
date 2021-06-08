@@ -24,20 +24,18 @@ fn c509_root_test() {
     ];
 
     let c = C509Builder::new()
-        .cert_type(CertType::NatSigned)
-        .serial_number(vec![1, 2, 3, 4])
-        .issuer(NameOid::Country, "US")
-        .issuer(NameOid::StateOrProvince, "California")
-        .issuer(NameOid::Organization, "Organization")
+        .cert_type(CertType::CborSigned)
+        .serial_number(vec![0x01, 0xf5, 0x0d])
+        .issuer(NameOid::CommonName, "RFC test CA")
         .not_before(1_577_836_800)
         .not_after(1_622_224_000)
-        .subject(NameOid::Country, "US")
-        .subject(NameOid::StateOrProvince, "California")
-        .subject(NameOid::Organization, "Organization")
+        .subject(NameOid::CommonName, "RFC test CA")
         .pub_key_algo(PubAlgoId::Rsa)
         .pub_key_rsa(pub_rsa_n, 65537)
         .sign_algo(SignAlgoId::RsaSsaPkcs1v15WithSha256)
         .build();
 
-    println!("{:?}", c);
+    let cbor = c.enc().unwrap_or_else(|| panic!("Encoding failed"));
+
+    println!(">>> {:02x?}", cbor);
 }

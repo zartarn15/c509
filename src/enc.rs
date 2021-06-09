@@ -1,12 +1,26 @@
 use crate::cbor::*;
-use crate::{Name, NameOid, C509};
+use crate::{Name, NameOid, PubKey, C509};
 
 fn enc_serial_number(sn: Vec<u8>) -> Option<Vec<u8>> {
-    // TODO: Any leading 0x00 is therefore omitted
+    if sn.len() == 0 {
+        return None;
+    }
+
+    /* Any leading 0x00 is therefore omitted */
+    // TODO
+
     sn.to_cbor()
 }
 
 fn enc_name(n: Vec<Name>) -> Option<Vec<u8>> {
+    if n.len() == 0 {
+        return None;
+    }
+
+    /* Convert CN format HH-HH-HH-HH-HH-HH-HH-HH */
+    // TODO
+
+    /* Single CommonName case */
     if n.len() == 1 {
         let name = n.get(0)?;
         if name.oid == NameOid::CommonName {
@@ -14,7 +28,17 @@ fn enc_name(n: Vec<Name>) -> Option<Vec<u8>> {
         }
     }
 
+    /* Multiple names */
+    // TODO
+
     None
+}
+
+fn enc_pub_key(pk: Option<PubKey>) -> Option<Vec<u8>> {
+    match pk? {
+        PubKey::Rsa(r) => r.n.to_cbor(), //TODO: If the exponent is not 65537
+        PubKey::Ec(e) => e.key.to_cbor(),
+    }
 }
 
 fn serialize(cbor: &Vec<Vec<u8>>) -> Vec<u8> {
@@ -31,28 +55,71 @@ fn serialize(cbor: &Vec<Vec<u8>>) -> Vec<u8> {
 fn encode(c: C509) -> Option<Vec<u8>> {
     let mut cbor = Vec::new();
 
-    /* cborCertificateType */
-    match c.cert_type {
-        Some(t) => cbor.push(vec![t as u8]),
-        None => {
-            println!("Failed: cert_type is not set");
-            return None;
-        }
-    }
-
-    /* certificateSerialNumber */
-    if c.serial_number.len() == 0 {
-        println!("Failed: cert_type is not set");
+    if let Some(v) = (c.cert_type? as i32).to_cbor() {
+        cbor.push(v);
+    } else {
+        println!("Failed: Type");
         return None;
     }
-    cbor.push(enc_serial_number(c.serial_number)?);
 
-    /* issuerName */
-    if c.issuer.len() == 0 {
-        println!("Failed: no issuer found");
+    if let Some(v) = enc_serial_number(c.serial_number) {
+        cbor.push(v);
+    } else {
+        println!("Failed: SerialNumber");
         return None;
     }
-    cbor.push(enc_name(c.issuer)?);
+
+    if let Some(v) = enc_name(c.issuer) {
+        cbor.push(v);
+    } else {
+        println!("Failed: IssuerName");
+        return None;
+    }
+
+    if let Some(v) = c.not_before.to_cbor() {
+        cbor.push(v);
+    } else {
+        println!("Failed: NotBefore");
+        return None;
+    }
+
+    if let Some(v) = c.not_after.to_cbor() {
+        cbor.push(v);
+    } else {
+        println!("Failed: NotAfter");
+        return None;
+    }
+
+    if let Some(v) = enc_name(c.subject) {
+        cbor.push(v);
+    } else {
+        println!("Failed: SubjectName");
+        return None;
+    }
+
+    if let Some(v) = (c.pub_key_algo? as i32).to_cbor() {
+        cbor.push(v);
+    } else {
+        println!("Failed: PubKeyAlgo");
+        return None;
+    }
+
+    if let Some(v) = enc_pub_key(c.pub_key) {
+        cbor.push(v);
+    } else {
+        println!("Failed: PubKey");
+        return None;
+    }
+
+    // TODO: Extensions
+    cbor.push(vec![1]);
+
+    if let Some(v) = (c.sign_algo? as i32).to_cbor() {
+        cbor.push(v);
+    } else {
+        println!("Failed: SignAlgo");
+        return None;
+    }
 
     Some(serialize(&cbor))
 }

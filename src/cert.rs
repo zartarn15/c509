@@ -79,7 +79,6 @@ pub struct RsaPub {
 #[derive(Debug, PartialEq)]
 pub struct EcPub {
     pub key: Vec<u8>,
-    pub curve: Vec<u64>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -219,11 +218,8 @@ impl C509Builder {
         self
     }
 
-    pub fn pub_key_ec(mut self, key: Vec<u8>, curve: Vec<u64>) -> C509Builder {
-        let pub_key = PubKey::Ec(EcPub {
-            key: key,
-            curve: curve,
-        });
+    pub fn pub_key_ec(mut self, key: Vec<u8>) -> C509Builder {
+        let pub_key = PubKey::Ec(EcPub { key: key });
         self.pub_key = Some(pub_key);
         self
     }
